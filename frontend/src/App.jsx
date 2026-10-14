@@ -142,6 +142,8 @@ function normalizeRoadmap(raw) {
       duration: item.duration || "Self-paced",
       description: item.description || item.project || "Build practical knowledge for this skill.",
       topics: Array.isArray(item.topics) ? item.topics : [],
+      resource: item.resource || "",
+      project: item.project || "",
     }));
   }
 
@@ -154,6 +156,8 @@ function normalizeRoadmap(raw) {
         duration: value.duration || "Self-paced",
         description: value.description || value.project || `Learn ${skill} through guided practice.`,
         topics: Array.isArray(value.topics) ? value.topics : [],
+        resource: value.resource || "",
+        project: value.project || "",
       };
     });
   }
@@ -161,24 +165,325 @@ function normalizeRoadmap(raw) {
   return [];
 }
 
+function getJobCategory(title = "") {
+  const value = title.toLowerCase();
+
+  if (
+    value.includes("bpo") ||
+    value.includes("customer support") ||
+    value.includes("customer service") ||
+    value.includes("voice process") ||
+    value.includes("non-voice") ||
+    value.includes("chat support") ||
+    value.includes("process associate") ||
+    value.includes("back office") ||
+    value.includes("data entry")
+  ) return "BPO & Customer Support";
+
+  if (
+    value.includes("hr ") ||
+    value.startsWith("hr") ||
+    value.includes("recruiter") ||
+    value.includes("talent acquisition") ||
+    value.includes("admin")
+  ) return "HR & Administration";
+
+  if (
+    value.includes("sales") ||
+    value.includes("business development") ||
+    value.includes("relationship executive") ||
+    value.includes("business analyst")
+  ) return "Sales & Business";
+
+  if (
+    value.includes("data analyst") ||
+    value.includes("data scientist") ||
+    value.includes("data engineer") ||
+    value.includes("business intelligence") ||
+    value.includes("bi analyst")
+  ) return "Data & Analytics";
+
+  if (
+    value.includes("machine learning") ||
+    value.includes("ml engineer") ||
+    value.includes("ai engineer") ||
+    value.includes("deep learning") ||
+    value.includes("nlp") ||
+    value.includes("computer vision")
+  ) return "AI & ML";
+
+  if (
+    value.includes("cloud") ||
+    value.includes("devops") ||
+    value.includes("aws") ||
+    value.includes("azure") ||
+    value.includes("system administrator")
+  ) return "Cloud & DevOps";
+
+  if (
+    value.includes("qa") ||
+    value.includes("tester") ||
+    value.includes("testing") ||
+    value.includes("automation")
+  ) return "Testing & QA";
+
+  if (
+    value.includes("support engineer") ||
+    value.includes("technical support") ||
+    value.includes("application support") ||
+    value.includes("it support")
+  ) return "IT Support";
+
+  return "IT & Software";
+}
+
 function normalizeJobs(data) {
   const list = data?.recommendations || data?.jobs || data?.data || [];
   return Array.isArray(list)
-    ? list.map((job) => ({
-        ...job,
-        title: job.title || job.role || "Untitled Role",
-        company: job.company || "Recommended Role",
-        location: job.location || "India",
-        match_percentage: Number(
-          job.match_percentage ?? job.match ?? job.score ?? 0
-        ),
-        required_skills:
-          job.required_skills || job.skills || [],
-        matched_skills: job.matched_skills || [],
-        missing_skills: job.missing_skills || [],
-      }))
+    ? list.map((job) => {
+        const title = job.title || job.role || "Untitled Role";
+        return {
+          ...job,
+          title,
+          company: job.company || "Recommended Role",
+          location: job.location || "India",
+          category: job.category || getJobCategory(title),
+          experience: job.experience || "Fresher / Entry Level",
+          work_mode: job.work_mode || job.workMode || "Full-time",
+          match_percentage: Number(
+            job.match_percentage ?? job.match ?? job.score ?? 0
+          ),
+          required_skills: Array.isArray(job.required_skills)
+            ? job.required_skills
+            : Array.isArray(job.skills)
+              ? job.skills
+              : [],
+          matched_skills: Array.isArray(job.matched_skills)
+            ? job.matched_skills
+            : [],
+          missing_skills: Array.isArray(job.missing_skills)
+            ? job.missing_skills
+            : [],
+        };
+      })
     : [];
 }
+
+
+const ADVANCED_ROADMAPS = {
+  "Frontend Developer": [
+    {
+      number: "01",
+      title: "Advanced React",
+      duration: "7 Days",
+      description: "Move from basic React usage to production-level component architecture and performance.",
+      topics: ["Advanced component patterns", "Custom hooks", "Context and state optimization", "Reusable component architecture", "Build an advanced React feature"],
+      resource: "https://react.dev/learn",
+      project: "Build an Advanced React Job Dashboard"
+    },
+    {
+      number: "02",
+      title: "TypeScript for React",
+      duration: "6 Days",
+      description: "Add type safety and scalable development practices to React applications.",
+      topics: ["Types and interfaces", "Generics", "Typed React props", "Typed API responses", "Convert a React module to TypeScript"],
+      resource: "https://www.typescriptlang.org/docs/",
+      project: "Convert a React Project to TypeScript"
+    },
+    {
+      number: "03",
+      title: "Frontend Testing",
+      duration: "5 Days",
+      description: "Learn practical testing for components, interactions and user flows.",
+      topics: ["Testing fundamentals", "React Testing Library", "Component testing", "User interaction testing", "Write automated frontend tests"],
+      resource: "https://testing-library.com/docs/react-testing-library/intro/",
+      project: "Add Automated Tests to a React Application"
+    },
+    {
+      number: "04",
+      title: "Performance Optimization",
+      duration: "5 Days",
+      description: "Improve application speed, bundle size and real-world web performance.",
+      topics: ["Web performance fundamentals", "Code splitting", "Lazy loading", "Memoization", "Core Web Vitals"],
+      resource: "https://web.dev/learn/performance/",
+      project: "Optimize a Production React Application"
+    },
+    {
+      number: "05",
+      title: "Production Deployment",
+      duration: "4 Days",
+      description: "Prepare a frontend application for production deployment and monitoring.",
+      topics: ["Production builds", "Environment variables", "Deployment configuration", "CI/CD basics", "Production monitoring"],
+      resource: "https://vercel.com/docs",
+      project: "Deploy a Production React Application"
+    }
+  ],
+  "Full Stack Developer": [
+    {
+      number: "01",
+      title: "Advanced Full Stack Architecture",
+      duration: "7 Days",
+      description: "Design scalable frontend, backend, database and API layers.",
+      topics: ["Frontend-backend architecture", "REST API integration", "Authentication", "Error handling", "Production architecture"],
+      resource: "https://developer.mozilla.org/en-US/docs/Learn",
+      project: "Build a Production Full Stack Application"
+    },
+    {
+      number: "02",
+      title: "TypeScript",
+      duration: "6 Days",
+      description: "Use TypeScript to improve maintainability across full stack applications.",
+      topics: ["Types and interfaces", "Generics", "Type-safe React props", "Typed APIs", "Type-safe full stack development"],
+      resource: "https://www.typescriptlang.org/docs/",
+      project: "Build a Type-Safe Full Stack App"
+    },
+    {
+      number: "03",
+      title: "Authentication & Security",
+      duration: "6 Days",
+      description: "Implement secure authentication and protected application flows.",
+      topics: ["Authentication fundamentals", "JWT", "Password security", "Role-based access", "Protected frontend and backend routes"],
+      resource: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication",
+      project: "Build an Authenticated Full Stack App"
+    },
+    {
+      number: "04",
+      title: "Database & API Optimization",
+      duration: "5 Days",
+      description: "Improve API response time and database performance.",
+      topics: ["Database indexing", "Query optimization", "Pagination", "Caching basics", "API performance"],
+      resource: "https://www.mongodb.com/docs/",
+      project: "Optimize a Full Stack E-Commerce API"
+    }
+  ],
+  "Python Developer": [
+    {
+      number: "01",
+      title: "Advanced Python",
+      duration: "7 Days",
+      description: "Strengthen Python with advanced language features and production practices.",
+      topics: ["Decorators", "Generators", "Async programming", "Exception handling", "Logging and clean architecture"],
+      resource: "https://docs.python.org/3/tutorial/",
+      project: "Build a Production Python Service"
+    },
+    {
+      number: "02",
+      title: "FastAPI & REST API Architecture",
+      duration: "6 Days",
+      description: "Build scalable REST APIs with validation, documentation and security.",
+      topics: ["FastAPI fundamentals", "Pydantic validation", "Dependency injection", "Authentication", "API documentation"],
+      resource: "https://fastapi.tiangolo.com/tutorial/",
+      project: "Build a Production Resume API"
+    },
+    {
+      number: "03",
+      title: "Testing & Deployment",
+      duration: "5 Days",
+      description: "Test and deploy Python applications using production practices.",
+      topics: ["Unit testing", "API testing", "Mocking", "Docker deployment", "Production monitoring"],
+      resource: "https://docs.pytest.org/",
+      project: "Test and Deploy a Python Application"
+    }
+  ],
+  "Backend Developer": [
+    {
+      number: "01",
+      title: "Advanced Backend Architecture",
+      duration: "7 Days",
+      description: "Design maintainable and scalable backend services.",
+      topics: ["Layered architecture", "REST API design", "Authentication", "Error handling", "Caching"],
+      resource: "https://fastapi.tiangolo.com/tutorial/",
+      project: "Build a Production Backend API"
+    },
+    {
+      number: "02",
+      title: "Database Optimization",
+      duration: "5 Days",
+      description: "Improve database design and query performance.",
+      topics: ["Database indexing", "Query optimization", "Transactions", "Relationships", "Performance tuning"],
+      resource: "https://www.postgresql.org/docs/",
+      project: "Optimize a Backend Database"
+    },
+    {
+      number: "03",
+      title: "API Testing",
+      duration: "4 Days",
+      description: "Create reliable automated tests for backend services.",
+      topics: ["API testing fundamentals", "Unit tests", "Integration tests", "Mocking", "Automated API test suites"],
+      resource: "https://fastapi.tiangolo.com/tutorial/testing/",
+      project: "Create an Automated API Test Suite"
+    }
+  ],
+  "Data Analyst": [
+    {
+      number: "01",
+      title: "Advanced SQL",
+      duration: "6 Days",
+      description: "Use advanced SQL techniques for business and analytical problems.",
+      topics: ["Window functions", "CTEs", "Subqueries", "Query optimization", "Analytical SQL"],
+      resource: "https://www.w3schools.com/sql/",
+      project: "Build an Advanced Sales Analytics Database"
+    },
+    {
+      number: "02",
+      title: "Power BI Dashboarding",
+      duration: "5 Days",
+      description: "Create interactive business intelligence dashboards.",
+      topics: ["Data modeling", "Power BI visuals", "DAX basics", "Interactive dashboards", "Dashboard publishing"],
+      resource: "https://learn.microsoft.com/power-bi/",
+      project: "Build a Business Intelligence Dashboard"
+    },
+    {
+      number: "03",
+      title: "Data Storytelling",
+      duration: "4 Days",
+      description: "Turn analytical results into clear business insights.",
+      topics: ["Business KPIs", "Chart selection", "Dashboard design", "Insight generation", "Present analytical findings"],
+      resource: "https://learn.microsoft.com/power-bi/",
+      project: "Create an Executive Sales Report"
+    }
+  ],
+  "Machine Learning Engineer": [
+    {
+      number: "01",
+      title: "Advanced Machine Learning",
+      duration: "8 Days",
+      description: "Improve model quality with advanced machine learning workflows.",
+      topics: ["Feature engineering", "Model evaluation", "Cross validation", "Hyperparameter tuning", "ML pipelines"],
+      resource: "https://scikit-learn.org/stable/user_guide.html",
+      project: "Build an End-to-End ML Pipeline"
+    },
+    {
+      number: "02",
+      title: "Model Deployment",
+      duration: "6 Days",
+      description: "Deploy machine learning models as production-ready services.",
+      topics: ["Model serialization", "REST API deployment", "FastAPI for ML", "Docker for ML", "Prediction monitoring"],
+      resource: "https://fastapi.tiangolo.com/",
+      project: "Deploy a Machine Learning API"
+    }
+  ],
+  "Cloud Developer": [
+    {
+      number: "01",
+      title: "AWS Architecture",
+      duration: "7 Days",
+      description: "Understand how to design secure and scalable cloud applications.",
+      topics: ["AWS architecture", "EC2", "S3", "IAM", "Cloud networking basics"],
+      resource: "https://aws.amazon.com/getting-started/",
+      project: "Design and Deploy a Cloud Application"
+    },
+    {
+      number: "02",
+      title: "Cloud Deployment",
+      duration: "5 Days",
+      description: "Deploy and monitor containerized applications in the cloud.",
+      topics: ["Application deployment", "Environment configuration", "Docker deployment", "Cloud logging", "Cloud monitoring"],
+      resource: "https://docs.aws.amazon.com/",
+      project: "Deploy a Dockerized Application on AWS"
+    }
+  ]
+};
 
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
@@ -209,6 +514,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [jobSort, setJobSort] = useState("high-low");
   const [jobFilter, setJobFilter] = useState("all");
+  const [jobCategory, setJobCategory] = useState("all");
   const [openRoadmap, setOpenRoadmap] = useState(0);
   const [completedTopics, setCompletedTopics] = useState({});
   const [jobModal, setJobModal] = useState(null);
@@ -341,6 +647,10 @@ function App() {
     setLoading(true);
     setError("");
     setLoadingStep(0);
+    setRoadmap([]);
+    setSelectedJob(null);
+    setCompletedTopics({});
+    setOpenRoadmap(0);
 
     try {
       const form = new FormData();
@@ -408,54 +718,95 @@ function App() {
       showToast("Resume analysis completed successfully.");
     } catch (err) {
       console.error(err);
-      setError(
-        err.message ||
-          "Unable to connect to the backend. Please make sure FastAPI is running."
-      );
-      showToast(
-        err.message ||
-          "Analysis failed. Check whether the backend is running on port 8000."
-      );
+
+      const message =
+        err instanceof TypeError
+          ? "Failed to fetch. Make sure FastAPI is running on http://127.0.0.1:8000 and CORS is enabled."
+          : err.message ||
+            "Unable to connect to the backend. Please make sure FastAPI is running.";
+
+      setError(message);
+      showToast(message);
     } finally {
       setLoading(false);
       setLoadingStep(0);
     }
   };
 
-  const loadRoadmap = async (missingSkills) => {
+  const loadRoadmap = async (missingSkills, job = null) => {
     const skills = Array.isArray(missingSkills) ? missingSkills : [];
+    const jobTitle = job?.title || job?.role || "";
+    const jobMatch = Number(job?.match_percentage ?? job?.match ?? 0);
 
-    if (!skills.length) {
-      setRoadmap(fallbackRoadmap);
+    // 100% match: show advanced learning instead of a missing-skill roadmap.
+    if (skills.length === 0 && jobMatch >= 100) {
+      const advanced = ADVANCED_ROADMAPS[jobTitle];
+
+      if (advanced?.length) {
+        setRoadmap(advanced);
+      } else {
+        setRoadmap([
+          {
+            number: "01",
+            title: "Advanced Career Development",
+            duration: "7 Days",
+            description:
+              "You already match the core skills for this role. Focus on advanced concepts, production practices and portfolio quality.",
+            topics: [
+              "Advanced role-specific concepts",
+              "Production-ready architecture",
+              "Testing and debugging",
+              "Performance optimization",
+              "Deployment and monitoring"
+            ],
+            resource: "https://developer.mozilla.org/",
+            project: `Build an advanced ${jobTitle || "developer"} project`
+          }
+        ]);
+      }
+
+      setOpenRoadmap(0);
       return;
     }
 
-    try {
-      const data = await apiRequest("/api/learning-roadmap", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ missing_skills: skills }),
-      });
+    // Less than 100%: use the FastAPI missing-skill roadmap.
+    if (skills.length > 0) {
+      try {
+        const data = await apiRequest("/api/learning-roadmap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ missing_skills: skills }),
+        });
 
-      const normalized = normalizeRoadmap(data);
-      setRoadmap(normalized.length ? normalized : fallbackRoadmap);
-    } catch (err) {
-      console.warn("Roadmap API failed:", err);
-      setRoadmap(fallbackRoadmap);
-      showToast("Roadmap API unavailable. Showing the default roadmap.");
+        const normalized = normalizeRoadmap(data);
+        setRoadmap(normalized.length ? normalized : fallbackRoadmap);
+        setOpenRoadmap(0);
+      } catch (err) {
+        console.warn("Roadmap API failed:", err);
+        setRoadmap(fallbackRoadmap);
+        setOpenRoadmap(0);
+        showToast("Roadmap API unavailable. Showing the default roadmap.");
+      }
+
+      return;
     }
+
+    setRoadmap(fallbackRoadmap);
+    setOpenRoadmap(0);
   };
 
   const selectJob = async (job) => {
     setSelectedJob(job);
     setCompletedTopics({});
+    setOpenRoadmap(0);
+
     try {
       localStorage.removeItem("ajsa-progress");
     } catch {
       // Ignore storage errors.
     }
 
-    await loadRoadmap(job.missing_skills);
+    await loadRoadmap(job?.missing_skills, job);
     navigate("roadmap");
   };
 
@@ -472,12 +823,20 @@ function App() {
     }));
   };
 
-  const matchPercent = Number(
-    analysis?.match_percentage ??
-      analysis?.match_percent ??
-      skillGap?.match_percentage ??
-      skillGap?.match_percent ??
-      0
+  const matchPercent = Math.min(
+    100,
+    Math.max(
+      0,
+      Number(
+        analysis?.match_percentage ??
+          analysis?.match_percent ??
+          analysis?.match_score ??
+          skillGap?.match_percentage ??
+          skillGap?.match_percent ??
+          skillGap?.match_score ??
+          0
+      )
+    )
   );
 
   const matchedSkills =
@@ -516,28 +875,40 @@ function App() {
       : 0;
 
   const displayedJobs = useMemo(() => {
-    const source = recommendations.length ? recommendations : fallbackJobs;
+    const source = recommendations.length
+      ? recommendations.map((job) => ({
+          ...job,
+          category: job.category || getJobCategory(job.title),
+          experience: job.experience || "Fresher / Entry Level",
+          work_mode: job.work_mode || "Full-time",
+        }))
+      : fallbackJobs.map((job) => ({
+          ...job,
+          category: getJobCategory(job.title),
+          experience: "Fresher / Entry Level",
+          work_mode: "Full-time",
+        }));
 
     return source
       .filter((job) => {
         const text =
-          `${job.title} ${job.company} ${job.location}`.toLowerCase();
+          `${job.title} ${job.company} ${job.location} ${job.category}`.toLowerCase();
         const matchesSearch = text.includes(search.toLowerCase());
+        const matchesCategory =
+          jobCategory === "all" || job.category === jobCategory;
 
-        if (jobFilter === "80") {
-          return matchesSearch && job.match_percentage >= 80;
-        }
-        if (jobFilter === "60") {
-          return matchesSearch && job.match_percentage >= 60;
-        }
-        return matchesSearch;
+        if (!matchesSearch || !matchesCategory) return false;
+
+        if (jobFilter === "80") return job.match_percentage >= 80;
+        if (jobFilter === "60") return job.match_percentage >= 60;
+        return true;
       })
       .sort((a, b) =>
         jobSort === "low-high"
           ? a.match_percentage - b.match_percentage
           : b.match_percentage - a.match_percentage
       );
-  }, [recommendations, search, jobFilter, jobSort]);
+  }, [recommendations, search, jobFilter, jobSort, jobCategory]);
 
   return (
     <div className={`app ${theme}`}>
@@ -589,6 +960,8 @@ function App() {
             setJobSort={setJobSort}
             jobFilter={jobFilter}
             setJobFilter={setJobFilter}
+            jobCategory={jobCategory}
+            setJobCategory={setJobCategory}
             selectJob={selectJob}
             analyzed={analyzed}
           />
@@ -709,7 +1082,7 @@ function Dashboard({ navigate }) {
               <span>Resume Analysis</span>
             </div>
             <div>
-              <strong>7+</strong>
+              <strong>60+</strong>
               <span>Career Roles</span>
             </div>
             <div>
@@ -992,13 +1365,18 @@ function SkillGap({
     );
   }
 
-  const safeMatched = matchedSkills.length
-    ? matchedSkills
-    : resumeSkills;
+  // Show every skill detected in the resume in "Your Skills".
+  // Matched skills are still used by the overall match calculation from the backend.
+  const displayedUserSkills = resumeSkills.length
+    ? resumeSkills
+    : matchedSkills;
 
+  // Only use demo missing skills when the backend did not return any data at all.
   const safeMissing = missingSkills.length
     ? missingSkills
-    : fallbackMissingSkills;
+    : analyzed && resumeSkills.length
+      ? []
+      : fallbackMissingSkills;
 
   return (
     <div className="page">
@@ -1040,18 +1418,28 @@ function SkillGap({
               <span className="green-dot" />
               <h2>Your Skills</h2>
             </div>
-            <span className="pill green">MATCHED</span>
+            <span className="pill green">FOUND</span>
           </div>
 
           <div className="detailed-skills">
-            {safeMatched.map((skill, index) => (
-              <SkillProgress
-                key={typeof skill === "string" ? skill : skill.name || index}
-                name={typeof skill === "string" ? skill : skill.name}
-                level={typeof skill === "string" ? 75 : skill.level || 75}
-                type="strong"
-              />
-            ))}
+            {displayedUserSkills.length ? (
+              displayedUserSkills.map((skill, index) => (
+                <SkillProgress
+                  key={typeof skill === "string" ? skill : skill.name || index}
+                  name={typeof skill === "string" ? skill : skill.name}
+                  level={
+                    typeof skill === "string"
+                      ? 100
+                      : Number.isFinite(Number(skill.level))
+                        ? Number(skill.level)
+                        : 100
+                  }
+                  type="strong"
+                />
+              ))
+            ) : (
+              <p className="muted">No skills were detected from the resume.</p>
+            )}
           </div>
         </section>
 
@@ -1122,6 +1510,8 @@ function JobMatches({
   setJobSort,
   jobFilter,
   setJobFilter,
+  jobCategory,
+  setJobCategory,
   selectJob,
   analyzed,
 }) {
@@ -1155,6 +1545,24 @@ function JobMatches({
 
         <select
           className="filter-button"
+          value={jobCategory}
+          onChange={(e) => setJobCategory(e.target.value)}
+          aria-label="Filter job category"
+        >
+          <option value="all">All Categories</option>
+          <option value="IT & Software">IT & Software</option>
+          <option value="Data & Analytics">Data & Analytics</option>
+          <option value="AI & ML">AI & ML</option>
+          <option value="Cloud & DevOps">Cloud & DevOps</option>
+          <option value="Testing & QA">Testing & QA</option>
+          <option value="IT Support">IT Support</option>
+          <option value="BPO & Customer Support">BPO & Customer Support</option>
+          <option value="Sales & Business">Sales & Business</option>
+          <option value="HR & Administration">HR & Administration</option>
+        </select>
+
+        <select
+          className="filter-button"
           value={jobFilter}
           onChange={(e) => setJobFilter(e.target.value)}
           aria-label="Filter job matches"
@@ -1179,7 +1587,9 @@ function JobMatches({
         <span>
           <strong>{jobs.length}</strong> matching opportunities
         </span>
-        <span>Sorted by skill match</span>
+        <span>
+          {jobCategory === "all" ? "All career categories" : jobCategory} • Sorted by skill match
+        </span>
       </div>
 
       <div className="job-grid-modern">
@@ -1215,10 +1625,18 @@ function JobCard({ job, onSelect }) {
       <p className="company-name">{job.company}</p>
       <p className="job-location">◉ {job.location}</p>
 
+      <div className="job-meta">
+        <span>{job.category || getJobCategory(job.title)}</span>
+        <span>{job.experience || "Fresher / Entry Level"}</span>
+        <span>{job.work_mode || "Full-time"}</span>
+      </div>
+
       <div className="job-skills">
-        {job.required_skills.slice(0, 5).map((skill) => (
-          <span key={skill}>{skill}</span>
-        ))}
+        {(Array.isArray(job.required_skills) ? job.required_skills : [])
+          .slice(0, 5)
+          .map((skill) => (
+            <span key={skill}>{skill}</span>
+          ))}
       </div>
 
       <button className="job-button" onClick={() => onSelect(job)}>
@@ -1241,8 +1659,16 @@ function LearningRoadmap({
     <div className="page">
       <PageHeading
         eyebrow="PERSONALIZED LEARNING"
-        title="Learning Roadmap"
-        description="Follow a structured path from your current skills to your target career."
+        title={
+          selectedJob && Number(selectedJob.match_percentage || 0) >= 100
+            ? "Advanced Career Roadmap"
+            : "Learning Roadmap"
+        }
+        description={
+          selectedJob && Number(selectedJob.match_percentage || 0) >= 100
+            ? "You already match the core skills for this role. Continue with advanced topics and production-level projects."
+            : "Follow a structured path from your current skills to your target career."
+        }
       />
 
       <div className="roadmap-summary">
@@ -1253,7 +1679,9 @@ function LearningRoadmap({
             <h2>{selectedJob?.title || "Full Stack Developer"}</h2>
             <p>
               {selectedJob
-                ? `${selectedJob.match_percentage}% current skill match`
+                ? Number(selectedJob.match_percentage || 0) >= 100
+                  ? "100% core skill match • Advanced learning path"
+                  : `${selectedJob.match_percentage}% current skill match`
                 : "Complete an analysis to personalize this roadmap."}
             </p>
           </div>
@@ -1325,6 +1753,46 @@ function LearningRoadmap({
                           No topic list returned by the roadmap service.
                         </span>
                       )}
+                    </div>
+
+                    <div className="free-resource-box">
+                      <div className="resource-icon">📚</div>
+                      <div className="resource-content">
+                        <h4>Free Learning Resource</h4>
+                        <p>
+                          Learn {item.title} using a free learning resource.
+                        </p>
+
+                        {item.resource ? (
+                          <a
+                            href={item.resource}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="resource-button"
+                          >
+                            Start Learning Free →
+                          </a>
+                        ) : (
+                          <a
+                            href={`https://www.google.com/search?q=${encodeURIComponent(
+                              `${item.title} free course`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="resource-button"
+                          >
+                            Find Free Course →
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mini-project">
+                      <h4>🛠️ Mini Project</h4>
+                      <p>
+                        {item.project ||
+                          `Build a ${item.title}-based mini project to practice what you learned.`}
+                      </p>
                     </div>
                   </div>
                 )}
