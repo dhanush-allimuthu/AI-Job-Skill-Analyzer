@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://ai-job-skill-analyzer.onrender.com";
 
 const navItems = [
   { id: "dashboard", label: "Home", icon: "⌂" },
